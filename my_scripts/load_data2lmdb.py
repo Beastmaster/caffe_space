@@ -15,11 +15,12 @@ class write_data2lmdb:
         self.env = lmdb.open(db_name)
         self.txn = env.begin(write=True)
 
-    def add(data,label):
-        
+    def add(self,data,label):
+        pass
 
 
-
+    def flush(self):
+        pass
 
 
 

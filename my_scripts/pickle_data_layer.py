@@ -3,15 +3,14 @@ import caffe
 import numpy as np
 from PIL import Image
 import os
+import cPickle as pickle
 
 import random
 
 class SliceDataLayer(caffe.Layer):
     """
-    Load (input image, label image) pairs from 
-    one batch at-a-time while reshaping the net to preserve dimensions.
-
-    Use this to feed data to a fully convolutional network.
+    Load (input image, label image) pairs from a cPickle file
+    pickle data with "data_augment.py"
     """
 
     def setup(self, bottom, top):
@@ -22,23 +21,12 @@ class SliceDataLayer(caffe.Layer):
         # config
         params = eval(self.param_str)
         
-        self.train_list = params['train_list']
-        self.data_dir = params['data_dir']
-        self.label_dir = params['label_dir']
+        self.tran_data = params['train_data']
         self.mean = params['mean']
         self.batch = params['batch']
-        self.is_color = params['is_color']
         self.phase = params['phase']
         self.crop_size = params['crop']
        
-        print self.train_list
-        print self.data_dir
-        print self.label_dir
-        print self.mean
-        print self.batch
-        print self.is_color
-        print self.phase
-        
         # two tops: data and label
         if len(top) != 2:
             raise Exception("Need to define two tops: data and label.")
@@ -48,19 +36,11 @@ class SliceDataLayer(caffe.Layer):
         
         # train list existence
         try:
-            with open(self.train_list,'r') as ff:
-                self.indices = ff.read().splitlines()
+            with open(self.tran_data,'r') as ff:
+                data = pickle.load(ff)
         except ValueError: 
-            raise Exception('Train list file not exists')        
+            raise Exception('Train pickle file not exists')        
         
-        # test train list file
-        for idx,line in enumerate(self.indices): 
-            img = self.data_dir+line.split()[0]
-            label = self.label_dir+line.split()[1]
-            if os.path.exists(img) & os.path.exists(label):
-                pass
-            else:
-                raise Exception('line: '+str(idx)+' not exists')
 
         self.iter = 0
         self.random = True
