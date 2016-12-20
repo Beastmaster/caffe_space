@@ -7,8 +7,8 @@
 
 *.caffemodel
 
-.ipynb_checkpoints
+**/.ipynb_checkpoints
 
-*/train_data
+**/train_data
 
 
