@@ -48,11 +48,10 @@ class AccuracyIOULayer(caffe.Layer):
         interect = sum_map.copy()
         interect[interect <2 ] = 0
 
-        pos1 = float(np.count_nonzero(union))/float(np.count_nonzero(sum_map))
+        pos1 = float(np.count_nonzero(union))/float(np.count_nonzero(label))
         pos2 = float(np.count_nonzero(interect))/float(np.count_nonzero(sum_map))
 
         top[0].data[...] = [pos1,pos2]
-        #top[0].data[...] = [np.count_nonzero(seg_score_map),np.count_nonzero(label),np.count_nonzero(interect),np.count_nonzero(sum_map)]
 
     def backward(self, top, propagate_down, bottom):
         pass

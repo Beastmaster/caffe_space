@@ -1,19 +1,32 @@
 name: "Spine_Seg"
 
 
-layer {
+#layer {
+#  name: "data"
+#  type: "Python"
+#  top: "data"
+#  top: "label"
+#  python_param {
+#    # python file name
+#    module: "slice_data_layer"
+#    # layer class name
+#    layer: "SliceDataLayer"
+#    param_str: "{'train_list': '/home/qinshuo/WorkPlace/caffe_space/seg_spine/spine_list/train_list.txt','data_dir':'/media/D/SpineDataset/spine_seg','label_dir':'/media/D/SpineDataset/spine_seg','mean':(10), 'batch':1 , 'is_color':False,'phase':'Train','crop': 512}"
+#  }
+#}
+
+layer{
   name: "data"
   type: "Python"
-  top: "data"
+  top:"data"
   top: "label"
   python_param {
-    # python file name
-    module: "slice_data_layer"
-    # layer class name
-    layer: "SliceDataLayer"
-    param_str: "{'train_list': '/home/qinshuo/WorkPlace/caffe_space/seg_spine/spine_list/train_list.txt','data_dir':'/media/D/SpineDataset/spine_seg','label_dir':'/media/D/SpineDataset/spine_seg','mean':(10), 'batch':1 , 'is_color':False,'phase':'Train','crop': 512}"
+    module: "lmdb_data_layer"
+    layer: "LMDBDataLayer"
+    param_str: "{'train_data':'/home/qinshuo/WorkPlace/caffe_space/seg_spine/spine_list/train_data','mean':(10),'batch':1,'phase':'TRAIN','crop':512}"
   }
 }
+
 
 
 # 224 x 224

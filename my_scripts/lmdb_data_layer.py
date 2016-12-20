@@ -1,15 +1,15 @@
 import caffe
 
-import numpy as np
 from PIL import Image
-import os
+import lmdb
 import cPickle as pickle
-
 import random
+import numpy as np
+import os
 
-class SliceDataLayer(caffe.Layer):
+class LMDBDataLayer(caffe.Layer):
     """
-    Load (input image, label image) pairs from a cPickle file
+    Load (input image, label image) pairs from a lmdb database
     pickle data with "data_augment.py"
     """
 
@@ -21,7 +21,7 @@ class SliceDataLayer(caffe.Layer):
         # config
         params = eval(self.param_str)
         
-        self.tran_data = params['train_data']
+        self.train_data = params['train_data']
         self.mean = params['mean']
         self.batch = params['batch']
         self.phase = params['phase']
@@ -36,8 +36,11 @@ class SliceDataLayer(caffe.Layer):
         
         # train list existence
         try:
-            with open(self.tran_data,'r') as ff:
-                data = pickle.load(ff)
+            self.env = lmdb.open(self.train_data)
+            self.txn = self.env.begin()
+            with self.env.begin() as txn:
+                self.train_data = [ key for key, _ in txn.cursor() ]
+
         except ValueError: 
             raise Exception('Train pickle file not exists')        
         
@@ -48,11 +51,10 @@ class SliceDataLayer(caffe.Layer):
         self.seed = 50
         if self.random:
             random.seed(self.seed)
-            #self.idx = random.randint(0, len(self.indices)-1)
-            self.indice_arr = np.arange(len(self.indices))
+            self.indice_arr = np.arange(len(self.train_data))
             np.random.shuffle(self.indice_arr)
         else:
-            self.indice_arr = np.arange(len(self.indices))
+            self.indice_arr = np.arange(len(self.train_data))
 
 
     def reshape(self, bottom, top):
@@ -63,7 +65,7 @@ class SliceDataLayer(caffe.Layer):
             self.idx =self.iter
         
         self.iter = self.iter+1
-        if self.iter>=len(self.indices):
+        if self.iter>=len(self.train_data):
             self.iter=0
 
         # load image + label image pair
@@ -86,17 +88,13 @@ class SliceDataLayer(caffe.Layer):
 
     def load_image(self, idx):
         """
-        Load input image and preprocess for Caffe:
-        - cast to float
-        - switch channels RGB -> BGR
-        - subtract mean
-        - transpose to channel x height x width order
+        Base function to load data from pickled dump
         """
         def load_per_img(idx):
-            line = self.indices[idx].split() 
-            img_name = self.data_dir+line[0]
-            im = Image.open(img_name,'r')
-            im = im.convert('L')
+            tmp = self.txn.get(self.train_data[idx])
+            im = pickle.loads(tmp)[0]
+            #im = im.convert('L')
+            im = Image.fromarray(im)
             im = im.resize((self.crop_size,self.crop_size),Image.NEAREST)
             in_ = np.array(im, dtype=np.float32)
             #in_ = np.expand_dims(in_,axis = 0)       
@@ -106,10 +104,10 @@ class SliceDataLayer(caffe.Layer):
         img_batch = np.zeros([self.batch,1,self.crop_size,self.crop_size])
         for ii in range(self.batch):
             ii_temp = ii + idx
-            if ii_temp<len(self.indices):
+            if ii_temp<len(self.train_data):
                 pass
             else:
-                ii_temp = ii_temp-len(self.indices)
+                ii_temp = ii_temp-len(self.train_data)
             img_batch[ii,:,:,:] = load_per_img(self.indice_arr[ii_temp])
 
         return img_batch
@@ -121,22 +119,21 @@ class SliceDataLayer(caffe.Layer):
         The leading singleton dimension is required by the loss.
         """
         def load_per_lab(idx):
-            line = self.indices[idx].split() 
-            label_name = self.label_dir+line[1]
-            im = Image.open(label_name)
-            im = im.convert('L')
+            tmp = self.txn.get(self.train_data[idx])
+            im = pickle.loads(tmp)[1]
+            #im = im.convert('L')
+            im = Image.fromarray(im)
             im = im.resize((self.crop_size,self.crop_size),Image.NEAREST)
             label = np.array(im, dtype=np.uint8)
-            # label = np.expand_dims(label,axis=2)
             return label
 
         label_batch = np.zeros([self.batch,1,self.crop_size,self.crop_size])
         for ii in range(self.batch):
             ii_temp = ii + idx
-            if ii_temp<len(self.indices):
+            if ii_temp<len(self.train_data):
                 pass
             else:
-                ii_temp = ii_temp-len(self.indices)
+                ii_temp = ii_temp-len(self.train_data)
             label_batch[ii,:,:,:] = load_per_lab(self.indice_arr[ii_temp])
 
         return label_batch
