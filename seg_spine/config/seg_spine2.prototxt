@@ -1,0 +1,620 @@
+name: "Spine_Seg"
+
+
+layer{
+  name: "data"
+  type: "Python"
+  top:"data"
+  top: "label"
+  python_param {
+    module: "lmdb_data_layer"
+    layer: "LMDBDataLayer"
+    param_str: "{'train_data':'/home/qinshuo/WorkPlace/caffe_space/seg_spine/spine_list/train_data','mean':(10),'batch':1,'phase':'TRAIN','crop':512}"
+  }
+}
+
+
+
+# 224 x 224
+# conv1_1
+layer {  bottom: "data"  top: "conv1_1"  name: "conv1_1"  type: "Convolution"
+  param { lr_mult: 1 decay_mult: 1 }
+  param { lr_mult: 2 decay_mult: 0 }
+  convolution_param {
+    num_output: 128 pad: 1 kernel_size: 3 stride: 1
+		weight_filler { type: "msra" variance_norm: AVERAGE }
+    bias_filler { type: "constant" }
+  }
+}
+
+layer { bottom: 'conv1_1' top: 'conv1_1' name: 'conv1_1-bn' type: 'BatchNorm'
+  batch_norm_param {
+    use_global_stats: false  # calculate the mean and variance for each mini-batch
+    moving_average_fraction: .999  # doesn't effect training 
+  }
+  param { lr_mult: 0 } 
+  param { lr_mult: 0 } 
+  param { lr_mult: 0 }
+}
+
+layer {  bottom: "conv1_1"  top: "conv1_1"  name: "relu1_1"  type: "ReLU"}
+
+# conv1_2
+layer {  bottom: "conv1_1"  top: "conv1_2"  name: "conv1_2"  type: "Convolution"
+  param { lr_mult: 1 decay_mult: 1 }
+  param { lr_mult: 2 decay_mult: 0 }
+  convolution_param {    
+    num_output: 64    
+    pad: 1    
+    kernel_size: 3
+		weight_filler { type: "msra" variance_norm: AVERAGE }
+    bias_filler { type: "constant" }
+  }
+}
+
+layer { bottom: 'conv1_2' top: 'conv1_2' name: 'conv1_2-bn' type: 'BatchNorm'
+  batch_norm_param {
+    use_global_stats: false  # calculate the mean and variance for each mini-batch
+    moving_average_fraction: .999  # doesn't effect training 
+  }
+  param { lr_mult: 0 } 
+  param { lr_mult: 0 } 
+  param { lr_mult: 0 }}
+
+layer {  bottom: "conv1_2"  top: "conv1_2"  name: "relu1_2"  type: "ReLU"}
+
+# pool1
+layer {
+  bottom: "conv1_2"  top: "pool1"  name: "pool1"  type: "Pooling"
+  pooling_param {    pool: MAX    kernel_size: 2    stride: 2  }
+}
+
+# 112 x 112
+# conv2_1
+layer {  bottom: "pool1"  top: "conv2_1"  name: "conv2_1"  type: "Convolution"
+    param { lr_mult: 1 decay_mult: 1 }
+  param { lr_mult: 2 decay_mult: 0 }
+  convolution_param {    num_output: 128    pad: 1    kernel_size: 3  
+  	weight_filler { type: "msra" variance_norm: AVERAGE }
+    bias_filler { type: "constant" }
+  }
+}
+
+layer { bottom: 'conv2_1' top: 'conv2_1' name: 'conv2_1-bn' type: 'BatchNorm'
+  batch_norm_param {
+    use_global_stats: false  # calculate the mean and variance for each mini-batch
+    moving_average_fraction: .999  # doesn't effect training 
+  }
+  param { lr_mult: 0 } 
+  param { lr_mult: 0 } 
+  param { lr_mult: 0 }
+}
+
+layer {  bottom: "conv2_1"  top: "conv2_1"  name: "relu2_1"  type: "ReLU"}
+
+
+
+# conv2_2
+layer {  bottom: "conv2_1"  top: "conv2_2"  name: "conv2_2"  type: "Convolution"
+    param { lr_mult: 1 decay_mult: 1 }
+  param { lr_mult: 2 decay_mult: 0 }
+  convolution_param {    num_output: 128    pad: 1    kernel_size: 3  
+    weight_filler { type: "msra" variance_norm: AVERAGE }
+    bias_filler { type: "constant" }
+  }
+}
+
+layer {  bottom: "conv2_2"  top: "conv2_2"  name: "relu2_2"  type: "ReLU"}
+
+# pool2
+layer {
+  bottom: "conv2_2"  top: "pool2"  name: "pool2"  type: "Pooling"
+  pooling_param {    pool: MAX    kernel_size: 2    stride: 2  }
+}
+
+# 56 x 56
+# conv3_1
+layer {  bottom: "pool2"  top: "conv3_1"  name: "conv3_1"  type: "Convolution"
+      param { lr_mult: 1 decay_mult: 1 }   param { lr_mult: 2 decay_mult: 0 }
+  convolution_param {    
+    num_output: 256    pad: 1    kernel_size: 3  
+  	weight_filler { type: "msra" variance_norm: AVERAGE }
+    bias_filler { type: "constant" }
+  }
+}
+
+layer { bottom: 'conv3_1' top: 'conv3_1' name: 'conv3_1-bn' type: 'BatchNorm'
+  batch_norm_param {
+    use_global_stats: false  # calculate the mean and variance for each mini-batch
+    moving_average_fraction: .999  # doesn't effect training 
+  }
+  param { lr_mult: 0 } 
+  param { lr_mult: 0 } 
+  param { lr_mult: 0 }
+}
+
+layer {  bottom: "conv3_1"  top: "conv3_1"  name: "relu3_1"  type: "ReLU"}
+
+
+# conv3_2
+layer {  bottom: "conv3_1"  top: "conv3_2"  name: "conv3_2"  type: "Convolution"
+      param { lr_mult: 1 decay_mult: 1 }   param { lr_mult: 2 decay_mult: 0 }
+  convolution_param {    
+    num_output: 256    
+    pad: 1    
+    kernel_size: 3  
+    weight_filler { type: "msra" variance_norm: AVERAGE }
+    bias_filler { type: "constant" }
+    }
+  }
+
+layer { bottom: 'conv3_2' top: 'conv3_2' name: 'conv3_2-bn' type: 'BatchNorm'
+  batch_norm_param {
+    use_global_stats: false  # calculate the mean and variance for each mini-batch
+    moving_average_fraction: .999  # doesn't effect training 
+  }
+  param { lr_mult: 0 } 
+  param { lr_mult: 0 } 
+  param { lr_mult: 0 }
+}
+
+layer {  bottom: "conv3_2"  top: "conv3_2"  name: "relu3_2"  type: "ReLU"}
+
+
+# conv3_3
+layer {  bottom: "conv3_2"  top: "conv3_3"  name: "conv3_3"  type: "Convolution"
+      param { lr_mult: 1 decay_mult: 1 }   param { lr_mult: 2 decay_mult: 0 }
+  convolution_param {    
+    num_output: 256    pad: 1    kernel_size: 3 
+    weight_filler { type: "msra" variance_norm: AVERAGE }
+    bias_filler { type: "constant" }
+  }
+  
+}
+
+layer { bottom: 'conv3_3' top: 'conv3_3' name: 'conv3_3-bn' type: 'BatchNorm'
+  batch_norm_param {
+    use_global_stats: false  # calculate the mean and variance for each mini-batch
+    moving_average_fraction: .999  # doesn't effect training 
+  }
+  param { lr_mult: 0 } 
+  param { lr_mult: 0 } 
+  param { lr_mult: 0 }
+}
+
+layer {  bottom: "conv3_3"  top: "conv3_3"  name: "relu3_3"  type: "ReLU"}
+
+# pool3
+layer {
+  bottom: "conv3_3"  top: "pool3"   name: "pool3"  type: "Pooling"
+  pooling_param {    pool: MAX    kernel_size: 2    stride: 2  }
+}
+
+# 28 x 28
+# conv4_1
+layer {  bottom: "pool3"  top: "conv4_1"  name: "conv4_1"  type: "Convolution"
+      param { lr_mult: 1 decay_mult: 1 }   param { lr_mult: 2 decay_mult: 0 }
+  convolution_param {    num_output: 512    pad: 1    kernel_size: 3  
+    weight_filler { type: "msra" variance_norm: AVERAGE }
+    bias_filler { type: "constant" }
+  }
+}
+
+layer { bottom: 'conv4_1' top: 'conv4_1' name: 'conv4_1-bn' type: 'BatchNorm'
+  batch_norm_param {
+    use_global_stats: false  # calculate the mean and variance for each mini-batch
+    moving_average_fraction: .999  # doesn't effect training 
+  }
+  param { lr_mult: 0 } 
+  param { lr_mult: 0 } 
+  param { lr_mult: 0 }
+}
+
+layer {  bottom: "conv4_1"  top: "conv4_1"  name: "relu4_1"  type: "ReLU"}
+
+# conv4_2
+layer {  bottom: "conv4_1"  top: "conv4_2"  name: "conv4_2"  type: "Convolution"
+      param { lr_mult: 1 decay_mult: 1 }   param { lr_mult: 2 decay_mult: 0 }
+  convolution_param {    num_output: 512    pad: 1    kernel_size: 3 
+    weight_filler { type: "msra" variance_norm: AVERAGE }
+    bias_filler { type: "constant" }
+  }
+}
+
+layer { bottom: 'conv4_2' top: 'conv4_2' name: 'conv4_2-bn' type: 'BatchNorm'
+  batch_norm_param {
+    use_global_stats: false  # calculate the mean and variance for each mini-batch
+    moving_average_fraction: .999  # doesn't effect training 
+  }
+  param { lr_mult: 0 } 
+  param { lr_mult: 0 } 
+  param { lr_mult: 0 }
+}
+
+layer {  bottom: "conv4_2"  top: "conv4_2"  name: "relu4_2"  type: "ReLU"}
+
+layer {
+  name: "drop4_2"
+  type: "Dropout"
+  bottom: "conv4_2"
+  top: "conv4_2"
+  dropout_param {
+    dropout_ratio: 0.75
+  }
+}
+
+# conv4_3
+layer {  bottom: "conv4_2"  top: "conv4_3"  name: "conv4_3"  type: "Convolution"
+      param { lr_mult: 1 decay_mult: 1 }   param { lr_mult: 2 decay_mult: 0 }
+  convolution_param {    num_output: 512    pad: 1    kernel_size: 3  
+    weight_filler { type: "msra" variance_norm: AVERAGE }
+    bias_filler { type: "constant" }
+  }
+}
+
+layer { bottom: 'conv4_3' top: 'conv4_3' name: 'conv4_3-bn' type: 'BatchNorm'
+  batch_norm_param {
+    use_global_stats: false  # calculate the mean and variance for each mini-batch
+    moving_average_fraction: .999  # doesn't effect training 
+  }
+  param { lr_mult: 0 } 
+  param { lr_mult: 0 } 
+  param { lr_mult: 0 }
+}
+
+layer {  bottom: "conv4_3"  top: "conv4_3"  name: "relu4_3"  type: "ReLU"}
+
+###### pool4
+#####layer {
+#####  bottom: "conv4_3"  top: "pool4"   name: "pool4"  type: "Pooling"
+#####  pooling_param {    pool: MAX    kernel_size: 2    stride: 2  }
+#####}
+#####
+###### 14 x 14
+#####
+###### conv5_1
+#####layer {  bottom: "pool4"  top: "conv5_1"  name: "conv5_1"  type: "Convolution"
+#####      param { lr_mult: 1 decay_mult: 1 }   param { lr_mult: 2 decay_mult: 0 }
+#####  convolution_param {    num_output: 512    pad: 1    kernel_size: 3  
+#####      weight_filler { type: "msra" variance_norm: AVERAGE }
+#####    bias_filler { type: "constant" }
+#####  }
+#####}
+#####
+#####layer { bottom: 'conv5_1' top: 'conv5_1' name: 'conv5_1-bn' type: 'BatchNorm'
+#####  batch_norm_param {
+#####    use_global_stats: false  # calculate the mean and variance for each mini-batch
+#####    moving_average_fraction: .999  # doesn't effect training 
+#####  }
+#####  param { lr_mult: 0 } 
+#####  param { lr_mult: 0 } 
+#####  param { lr_mult: 0 }
+#####}
+#####
+#####layer {  bottom: "conv5_1"  top: "conv5_1"  name: "relu5_1"  type: "ReLU"}
+#####
+#####
+###### conv5_2
+#####layer {  bottom: "conv5_1"  top: "conv5_2"  name: "conv5_2"  type: "Convolution"
+#####      param { lr_mult: 1 decay_mult: 1 }   param { lr_mult: 2 decay_mult: 0 }
+#####  convolution_param {    num_output: 512    pad: 1    kernel_size: 3  
+#####    weight_filler { type: "msra" variance_norm: AVERAGE }
+#####    bias_filler { type: "constant" }  
+#####  }
+#####}
+#####
+#####layer { bottom: 'conv5_2' top: 'conv5_2' name: 'conv5_2-bn' type: 'BatchNorm'
+#####  batch_norm_param {
+#####    use_global_stats: false  # calculate the mean and variance for each mini-batch
+#####    moving_average_fraction: .999  # doesn't effect training 
+#####  }
+#####  param { lr_mult: 0 } 
+#####  param { lr_mult: 0 } 
+#####  param { lr_mult: 0 }
+#####}
+#####
+#####layer {  bottom: "conv5_2"  top: "conv5_2"  name: "relu5_2"  type: "ReLU"}
+#####
+#####
+###### conv5_3
+#####layer {  bottom: "conv5_2"  top: "conv5_3"  name: "conv5_3"  type: "Convolution"
+#####      param { lr_mult: 1 decay_mult: 1 }   param { lr_mult: 2 decay_mult: 0 }
+#####  convolution_param {    num_output: 512    pad: 1    kernel_size: 3  
+#####    weight_filler { type: "msra" variance_norm: AVERAGE }
+#####    bias_filler { type: "constant" }
+#####  }
+#####}
+#####layer { bottom: 'conv5_3' top: 'conv5_3' name: 'conv5_3-bn' type: 'BatchNorm'
+#####  batch_norm_param {
+#####    use_global_stats: false  # calculate the mean and variance for each mini-batch
+#####    moving_average_fraction: .999  # doesn't effect training 
+#####  }
+#####  param { lr_mult: 0 } 
+#####  param { lr_mult: 0 } 
+#####  param { lr_mult: 0 }
+#####}
+#####layer {  bottom: "conv5_3"  top: "conv5_3"  name: "relu5_3"  type: "ReLU"}
+#####
+#####
+#####
+#####
+###### deconv5_2
+#####layer { bottom: 'conv5_3' top: 'deconv5_2' name: 'deconv5_2' type: "Convolution"
+#####      param { lr_mult: 1 decay_mult: 1 }   param { lr_mult: 2 decay_mult: 0 }
+#####  convolution_param { num_output: 512	pad: 1	kernel_size: 3
+#####    weight_filler { type: "msra" variance_norm: AVERAGE }
+#####    bias_filler { type: "constant" }
+#####  } 
+#####}
+#####layer { bottom: 'deconv5_2' top: 'deconv5_2' name: 'deconv5_2-bn' type: 'BatchNorm'
+#####  batch_norm_param {
+#####    use_global_stats: false  # calculate the mean and variance for each mini-batch
+#####    moving_average_fraction: .999  # doesn't effect training 
+#####  }
+#####  param { lr_mult: 0 } 
+#####  param { lr_mult: 0 } 
+#####  param { lr_mult: 0 }
+#####}
+#####layer { bottom: 'deconv5_2' top: 'deconv5_2' name: 'derelu5_2' type: "ReLU" }
+#####
+#####
+###### deconv5_3
+#####layer { bottom: 'deconv5_2' top: 'deconv5_3' name: 'deconv5_3' type: "Convolution"
+#####      param { lr_mult: 1 decay_mult: 1 }   param { lr_mult: 2 decay_mult: 0 }
+#####  convolution_param { num_output: 512	pad: 1	kernel_size: 3
+#####    weight_filler {      type: "gaussian"      std: 0.01    }
+#####    bias_filler {      type: "constant"      value: 0    }} }
+#####
+#####layer { bottom: 'deconv5_3' top: 'deconv5_3' name: 'deconv5_3-bn' type: 'BatchNorm'
+#####  batch_norm_param {
+#####    use_global_stats: false  # calculate the mean and variance for each mini-batch
+#####    moving_average_fraction: .999  # doesn't effect training 
+#####  }
+#####  param { lr_mult: 0 } 
+#####  param { lr_mult: 0 } 
+#####  param { lr_mult: 0 }
+#####}
+#####
+#####layer { bottom: 'deconv5_3' top: 'deconv5_3' name: 'derelu5_3' type: "ReLU" }
+#####
+#####
+###### 28 x 28
+###### deconv4_1
+#####layer { bottom: 'deconv5_3' top: 'deconv4_1' name: 'deconv4_1' type: "Deconvolution"
+#####      param { lr_mult: 1 decay_mult: 1 }   param { lr_mult: 2 decay_mult: 0 }
+#####  convolution_param { num_output: 512	pad: 0	kernel_size: 2 stride: 2
+#####    weight_filler {      type: "gaussian"      std: 0.01    }
+#####    bias_filler {      type: "constant"      value: 0    }} }
+#####
+#####layer { bottom: 'deconv4_1' top: 'deconv4_1' name: 'derelu4_1' type: "ReLU" }
+
+# deconv 4_2
+layer { bottom: 'conv4_3' top: 'deconv4_2' name: 'deconv4_2' type: "Convolution"
+      param { lr_mult: 1 decay_mult: 1 }   param { lr_mult: 2 decay_mult: 0 }
+  convolution_param { num_output: 512	pad: 1	kernel_size: 3
+    weight_filler {      type: "gaussian"      std: 0.01    }
+    bias_filler {      type: "constant"      value: 0    }} }
+layer { bottom: 'deconv4_2' top: 'deconv4_2' name: 'deconv4_2-bn' type: 'BatchNorm'
+  batch_norm_param {
+    use_global_stats: false  # calculate the mean and variance for each mini-batch
+    moving_average_fraction: .999  # doesn't effect training 
+  }
+  param { lr_mult: 0 } 
+  param { lr_mult: 0 } 
+  param { lr_mult: 0 }
+}
+
+layer { bottom: 'deconv4_2' top: 'deconv4_2' name: 'derelu4_2' type: "ReLU" }
+
+# deconv 4_3
+layer { bottom: 'deconv4_2' top: 'deconv4_3' name: 'deconv4_3' type: "Convolution"
+      param { lr_mult: 1 decay_mult: 1 }   param { lr_mult: 2 decay_mult: 0 }
+  convolution_param { num_output: 256	pad: 1	kernel_size: 3
+    weight_filler {      type: "gaussian"      std: 0.01    }
+    bias_filler {      type: "constant"      value: 0    }} }
+layer { bottom: 'deconv4_3' top: 'deconv4_3' name: 'deconv4_3-bn' type: 'BatchNorm'
+  batch_norm_param {
+    use_global_stats: false  # calculate the mean and variance for each mini-batch
+    moving_average_fraction: .999  # doesn't effect training 
+  }
+  param { lr_mult: 0 } 
+  param { lr_mult: 0 } 
+  param { lr_mult: 0 }
+}
+layer { bottom: 'deconv4_3' top: 'deconv4_3' name: 'derelu4_3' type: "ReLU" }
+
+
+
+# 56 x 56
+# deconv3_1
+layer { bottom: 'deconv4_3' top: 'deconv3_1' name: 'deconv3_1' type: "Deconvolution"
+      param { lr_mult: 1 decay_mult: 1 }   param { lr_mult: 2 decay_mult: 0 }
+  convolution_param { num_output:256	pad:0	kernel_size: 2 stride: 2
+    weight_filler {      type: "gaussian"      std: 0.01    }
+    bias_filler {      type: "constant"      value: 0    }} }
+layer { bottom: 'deconv3_1' top: 'deconv3_1' name: 'deconv3_1-bn' type: 'BatchNorm'
+  batch_norm_param {
+    use_global_stats: false  # calculate the mean and variance for each mini-batch
+    moving_average_fraction: .999  # doesn't effect training 
+  }
+  param { lr_mult: 0 } 
+  param { lr_mult: 0 } 
+  param { lr_mult: 0 }
+}
+layer { bottom: 'deconv3_1' top: 'deconv3_1' name: 'derelu3_1' type: "ReLU" }
+
+# deconv3_2
+layer { bottom: 'deconv3_1' top: 'deconv3_2' name: 'deconv3_2' type: "Convolution"
+      param { lr_mult: 1 decay_mult: 1 }   param { lr_mult: 2 decay_mult: 0 }
+  convolution_param { num_output:256	pad:1	kernel_size: 3
+    weight_filler {      type: "gaussian"      std: 0.01    }
+    bias_filler {      type: "constant"      value: 0    }} }
+layer { bottom: 'deconv3_2' top: 'deconv3_2' name: 'deconv3_2-bn' type: 'BatchNorm'
+  batch_norm_param {
+    use_global_stats: false  # calculate the mean and variance for each mini-batch
+    moving_average_fraction: .999  # doesn't effect training 
+  }
+  param { lr_mult: 0 } 
+  param { lr_mult: 0 } 
+  param { lr_mult: 0 }
+}
+
+layer { bottom: 'deconv3_2' top: 'deconv3_2' name: 'derelu3_2' type: "ReLU" }
+
+# deconv3_3
+layer { bottom: 'deconv3_2' top: 'deconv3_3' name: 'deconv3_3' type: "Convolution"
+      param { lr_mult: 1 decay_mult: 1 }   param { lr_mult: 2 decay_mult: 0 }
+  convolution_param { num_output:128	pad:1	kernel_size: 3
+    weight_filler {      type: "gaussian"      std: 0.01    }
+    bias_filler {      type: "constant"      value: 0    }} }
+
+layer { bottom: 'deconv3_3' top: 'deconv3_3' name: 'derelu3_3' type: "ReLU" }
+
+
+# 112 x 112
+# deconv2_1
+layer { bottom: 'deconv3_3' top: 'deconv2_1' name: 'deconv2_1' type: "Deconvolution"
+      param { lr_mult: 1 decay_mult: 1 }   param { lr_mult: 2 decay_mult: 0 }
+  convolution_param { num_output:128	pad:0	kernel_size: 2 stride: 2
+		weight_filler { type: "msra" variance_norm: AVERAGE }
+    bias_filler { type: "constant" }
+  } 
+}
+
+layer { bottom: 'deconv2_1' top: 'deconv2_1' name: 'derelu2_1' type: "ReLU" }
+# deconv2_2
+layer { bottom: 'deconv2_1' top: 'deconv2_2' name: 'deconv2_2' type: "Convolution"
+      param { lr_mult: 1 decay_mult: 1 }   param { lr_mult: 2 decay_mult: 0 }
+  convolution_param { num_output:64	pad:1	kernel_size: 3
+		weight_filler { type: "msra" variance_norm: AVERAGE }
+    bias_filler { type: "constant" }
+  } 
+}
+layer { bottom: 'deconv2_2' top: 'deconv2_2' name: 'deconv2_2-bn' type: 'BatchNorm'
+  batch_norm_param {
+    use_global_stats: false  # calculate the mean and variance for each mini-batch
+    moving_average_fraction: .999  # doesn't effect training 
+  }
+  param { lr_mult: 0 } 
+  param { lr_mult: 0 } 
+  param { lr_mult: 0 }
+}
+
+layer { bottom: 'deconv2_2' top: 'deconv2_2' name: 'derelu2_2' type: "ReLU" }
+
+
+layer {
+  name: "drop2_2"
+  type: "Dropout"
+  bottom: "deconv2_2"
+  top: "deconv2_2"
+  dropout_param {
+    dropout_ratio: 0.75
+  }
+}
+
+
+# deconv1_1
+layer { bottom: 'deconv2_2' top: 'deconv1_1' name: 'deconv1_1' type: "Deconvolution"
+      param { lr_mult: 1 decay_mult: 1 }   param { lr_mult: 2 decay_mult: 0 }
+  convolution_param { num_output:64	pad:0	kernel_size: 2 stride: 2
+		weight_filler { type: "msra" variance_norm: AVERAGE }
+    bias_filler { type: "constant" }
+  } 
+}
+
+layer { bottom: 'deconv1_1' top: 'deconv1_1' name: 'derelu1_1' type: "ReLU" }
+
+# deconv1_2
+layer { bottom: 'deconv1_1' top: 'deconv1_2' name: 'deconv1_2' type: "Convolution"
+      param { lr_mult: 1 decay_mult: 1 }   param { lr_mult: 2 decay_mult: 0 }
+  convolution_param { num_output:64     pad:1   kernel_size: 3
+		weight_filler { type: "msra" variance_norm: AVERAGE }
+    bias_filler { type: "constant" }
+  } 
+}
+
+layer { bottom: 'deconv1_2' top: 'deconv1_2' name: 'deconv1_2-bn' type: 'BatchNorm'
+  batch_norm_param {
+    use_global_stats: false  # calculate the mean and variance for each mini-batch
+    moving_average_fraction: .999  # doesn't effect training 
+  }
+  param { lr_mult: 0 } 
+  param { lr_mult: 0 } 
+  param { lr_mult: 0 }
+}
+
+layer { bottom: 'deconv1_2' top: 'deconv1_2' name: 'derelu1_2' type: "ReLU" }
+
+layer {
+  name: "drop1_2"
+  type: "Dropout"
+  bottom: "deconv1_2"
+  top: "deconv1_2"
+  dropout_param {
+    dropout_ratio: 0.75
+  }
+}
+
+
+# deconv1_3
+layer { bottom: 'deconv1_2' top: 'deconv1_3' name: 'deconv1_3' type: "Convolution"
+      param { lr_mult: 1 decay_mult: 1 }   param { lr_mult: 2 decay_mult: 0 }
+  convolution_param { num_output:64     pad:1   kernel_size: 3
+		weight_filler { type: "msra" variance_norm: AVERAGE }
+    bias_filler { type: "constant" }
+  } 
+}
+
+layer { bottom: 'deconv1_3' top: 'deconv1_3' name: 'deconv1_3-bn' type: 'BatchNorm'
+  batch_norm_param {
+    use_global_stats: false  # calculate the mean and variance for each mini-batch
+    moving_average_fraction: .999  # doesn't effect training 
+  }
+  param { lr_mult: 0 } 
+  param { lr_mult: 0 } 
+  param { lr_mult: 0 }
+}
+
+layer { bottom: 'deconv1_3' top: 'deconv1_3' name: 'derelu1_3' type: "ReLU" }
+
+
+
+
+
+# seg-score
+layer { name: 'seg-score' type: "Convolution" bottom: 'deconv1_2' top: 'seg-score'
+      param { lr_mult: 1 decay_mult: 1 }   param { lr_mult: 2 decay_mult: 0 }
+  convolution_param { 
+    num_output: 2 
+    kernel_size: 1
+    pad: 0
+    stride: 1
+		weight_filler { type: "msra" variance_norm: AVERAGE }
+    bias_filler { type: "constant" }
+  } 
+}
+
+
+
+layer {
+  name: "accuracy"
+  type: "Python"
+  bottom: "seg-score"
+  bottom: "label"
+  top: "accuracy"
+  python_param {
+    # python file name
+    module: "acc_iou_layer"
+    # layer class name
+    layer: "AccuracyIOULayer"
+  }
+}
+
+layer {
+  name: "loss"
+  type: "SoftmaxWithLoss"
+  bottom: "seg-score"
+  bottom: "label"
+  top: "loss"
+}

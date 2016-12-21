@@ -36,11 +36,6 @@ def convert_label(file_list,out_path=''):
                     if img[i,j] > 0:
                         new_img[i,j] = 1
             imsave(file,new_img)
-    pass
-
-
-def get_file_list(file_dir):
-    return glob.glob(file_dir)
 
 def convert_label_parameter_help():
     print(
@@ -67,10 +62,7 @@ if __name__ == '__main__':
     convert_label_parameter_help()
     #list_file = '/home/qinshuo/WorkPlace/deeplab2_2/train-DeepLab/exper/seg/data/label/*.*'
     list_file_dir = '/media/D/GE_qinshuo/train/label/*.png'
-    list_file_dir2 = '/media/D/GE_qinshuo/train/source/*.png'
     
-    file_list = get_file_list(list_file_dir)
-    file_list2 = get_file_list(list_file_dir2)
+    file_list = glob.glob(list_file_dir)
     convert_label(file_list)
-    #resize_images(file_list2) 
 

@@ -8,7 +8,37 @@ import numpy as np
 import os
 
 
-class DataAugmentation:
+
+
+class DataAugBase:
+    def __init__(self):
+        pass
+
+    def _open_img(self,name,dtype=np.float32):
+        try:
+            img = Image.open(name,'r')
+        except:
+            print "file: {} does not exist".format(name)
+        img2 = np.array(img.rotate(45),dtype=dtype)
+        return img2
+
+    def _rotate(self,image,angle):
+        '''
+        angle is degree(360)
+        '''
+        im2 = Image.fromarray(image)
+        return np.array(im2.rotate(angle),dtype=image.dtype)
+
+    def _resize(self,image):
+        pass
+
+
+    def _crop(self,image):
+        pass
+
+
+
+class DataAugmentation(DataAugBase):
     '''
     Rotate, resize, crop
     2D image
@@ -16,7 +46,6 @@ class DataAugmentation:
                   string   pickled numpy array
     '''
     def __init__(self,name):
-        self.data = []
         self.bEnableAug = True
         self.db_name = name
         self.env = lmdb.open(self.db_name,writemap=True,map_size=1024*1024*1024*1024)
@@ -48,11 +77,6 @@ class DataAugmentation:
             self.txn.commit()
             self.txn = self.env.begin(write=True)
 
-
-    def get_data(self):
-        return self.data
-
-
     def flush(self):  # flush will close the database
         txn = self.env.begin(write=True)
         txn.commit()
@@ -67,28 +91,35 @@ class DataAugmentation:
                 txn.put(kk,temp_txn.get(kk))
                 txn.commit()
                 txn = self.env.begin(write=True)
-        
-    def _open_img(self,name,dtype=np.float32):
-        try:
-            img = Image.open(name,'r')
-        except:
-            print "file: {} does not exist".format(name)
-        img2 = np.array(img.rotate(45),dtype=dtype)
-        return img2
-
-    def _rotate(self,image,angle):
-        '''
-        angle is degree(360)
-        '''
-        im2 = Image.fromarray(image)
-        return np.array(im2.rotate(angle),dtype=image.dtype)
-
-    def _resize(self,image):
-        pass
+    
 
 
-    def _crop(self,image):
-        pass
+
+
+class DataAugmentationFile(DataAugBase):
+    '''
+    Rotate image and save to file
+    '''
+    def __init__(self,ff,dir=''):
+        self.init_file = ff
+        idx = ff.rfind('.')
+        self.new_file = ff[:idx]+'aug'+ff[idx:]
+
+
+    def set_new_list(self,ff):
+        self.new_file = ff
+    
+    def set_new_img_dir(self,dd):
+        self.img_dir = dd
+    def set_new_label_dir(self,dd):
+        self.label_dir = 
+
+    def update(self):
+        with open(self.init_file,'r') as init_fp:
+            for line in init_fp.read().splitlines():
+                img = dir+line.split()[0]
+                label = dir+line.split()[1]
+                
 
 
 
@@ -96,7 +127,8 @@ class DataAugmentation:
 if __name__=='__main__':
     file_list = '/home/qinshuo/WorkPlace/caffe_space/seg_spine/spine_list/train_list.txt'
     ddir='/media/D/SpineDataset/spine_seg'
-    db_file = '/home/qinshuo/WorkPlace/caffe_space/seg_spine/spine_list/train_data'
+    #db_file = '/home/qinshuo/WorkPlace/caffe_space/seg_spine/spine_list/train_data'
+    db_file = '/media/D/test_train'
 
     with open(file_list,'r') as ff:
         indices = ff.read().splitlines()

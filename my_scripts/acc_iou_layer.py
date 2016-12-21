@@ -48,8 +48,12 @@ class AccuracyIOULayer(caffe.Layer):
         interect = sum_map.copy()
         interect[interect <2 ] = 0
 
-        pos1 = float(np.count_nonzero(union))/float(np.count_nonzero(label))
-        pos2 = float(np.count_nonzero(interect))/float(np.count_nonzero(sum_map))
+        try:
+            pos1 = float(np.count_nonzero(label))/float(np.count_nonzero(union))
+            pos2 = float(np.count_nonzero(interect))/float(np.count_nonzero(label))
+        except:
+            pos1 = 0.0
+            pos2 = 0.0
 
         top[0].data[...] = [pos1,pos2]
 
