@@ -7,6 +7,8 @@
 
 *.caffemodel
 
+*.pyc
+
 **/.ipynb_checkpoints
 
 **/train_data
