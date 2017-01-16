@@ -1,5 +1,12 @@
 
+'''
+Rotate image 
 
+Write to lmdb 
+
+This function is useless
+
+'''
 
 from PIL import Image
 import cPickle as pickle

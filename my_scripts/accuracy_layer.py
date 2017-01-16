@@ -1,3 +1,7 @@
+'''
+Accuracy layer
+'''
+
 import caffe
 
 import numpy as np
@@ -6,7 +10,7 @@ import os
 
 import random
 
-class AccuracyIOULayer(caffe.Layer):
+class AccuracyLayer(caffe.Layer):
     """
     Calculate segmentation accuracy
     
@@ -19,7 +23,13 @@ class AccuracyIOULayer(caffe.Layer):
 
         """
         # config
-        #params = eval(self.param_str)
+        self.prob_threshold = 0.5
+        self.accuracy_type = "IOU"
+        params = eval(self.param_str)
+        if "prob_threshold" in params:
+            self.prob_threshold = params["prob_threshold"]
+        if "accuracy_type" in params:
+            self.accuracy_type  = params["accuracy_type"]
 
         # two tops: data and label
         if len(top) > 1:
@@ -37,16 +47,11 @@ class AccuracyIOULayer(caffe.Layer):
     def forward(self, bottom, top):
         # assign output
         bottom_data = bottom[0].data[0,0,:]
-        seg_score_map = np.zeros(bottom_data.shape)
-        seg_score_map[bottom_data>=0.5] = 1
-        label = bottom[1].data[0]
+        score_map = np.greater(bottom_data,self.prob_threshold)
+        label = np.greater(bottom[1].data[0],self.prob_threshold)
 
-        sum_map = label + seg_score_map
-        union = sum_map.copy()
-        union[union>0] = 1
-
-        interect = sum_map.copy()
-        interect[interect <2 ] = 0
+        union = np.logical_or(score_map,label)
+        interact = np.logical_and(score_map,label)
 
         try:
             pos1 = float(np.count_nonzero(label))/float(np.count_nonzero(union))

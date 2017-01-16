@@ -573,9 +573,10 @@ layer {
   top: "accuracy"
   python_param {
     # python file name
-    module: "acc_iou_layer"
+    module: "accuracy_layer"
     # layer class name
-    layer: "AccuracyIOULayer"
+    layer: "AccuracyLayer"
+    param_str: "{'prob_threshold':0.5,'accuracy_type':'IOU'}"
   }
 }
 
